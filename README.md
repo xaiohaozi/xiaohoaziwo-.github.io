@@ -29,69 +29,7 @@
             // ... 其余代码与之前相同（defaultPageTexts、defaultCards、loadData、saveData 等）
             // 注意：loadData 应优先从 GitHub 加载，失败时使用默认值
 
-            // ==================== 新增：从 GitHub 加载数据 ====================
-            async function loadDataFromGitHub() {
-                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
-                try {
-                    const response = await fetch(url, {
-                        headers: { Authorization: `token ${GITHUB_TOKEN}` }
-                    });
-                    if (!response.ok) throw new Error('无法获取数据');
-                    const data = await response.json();
-                    // 文件内容是 base64 编码的
-                    const content = atob(data.content);
-                    cardsData = JSON.parse(content);
-                } catch (e) {
-                    console.warn('从 GitHub 加载失败，使用默认数据', e);
-                    cardsData = [...defaultCards];
-                }
-                // 确保卡片格式正确
-                cardsData = cardsData.map(c => ({
-                    id: c.id || 'card_' + Date.now() + Math.random().toString(36).substr(2, 4),
-                    title: c.title || '未命名',
-                    desc: c.desc || '',
-                    img: c.img || ''
-                }));
-                renderAll();
-            }
-
-            // ==================== 新增：保存到 GitHub ====================
-            async function saveToGitHub() {
-                const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${DATA_FILE_PATH}`;
-                // 先获取当前文件的 SHA（用于更新）
-                let sha = null;
-                try {
-                    const response = await fetch(url, {
-                        headers: { Authorization: `token ${GITHUB_TOKEN}` }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        sha = data.sha;
-                    }
-                } catch (e) { /* 文件可能不存在 */ }
-
-                // 准备新内容
-                const newContent = btoa(JSON.stringify(cardsData, null, 2));
-                const body = {
-                    message: '更新卡片数据',
-                    content: newContent,
-                    branch: 'main' // 如果您的主分支是 master，请改为 'master'
-                };
-                if (sha) body.sha = sha;
-
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        Authorization: `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (response.ok) {
-                    alert('数据已成功保存到 GitHub！');
-                } else {
-                    const error = await response.json();
-                    alert('保存失败：' + error.message);
+         
                 }
             }
 
