@@ -1,0 +1,21 @@
+name: Build Cards Data
+on:
+  push:
+    paths:
+      - 'cards.json'
+      - 'images/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate cards data with image URLs
+        run: |
+          node .github/scripts/generate-cards.js
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add cards_with_images.json
+          git commit -m "Update cards data" || exit 0
+          git push
